@@ -34,7 +34,7 @@ summary(data) # General info of the dataset
 ## Section 0
 
 ### a)	
-Create an hourly wage variable, which is earnings divided by hours worked.
+**Create an hourly wage variable, which is earnings divided by hours worked.**
 
 ```{r}
 # Create the new column named "hourly_wage"
@@ -48,11 +48,13 @@ summary(data$hourly_wage)
 
 
 ### b)	
-Define an indicator working = 1 if their annual hours worked exceeds zero.
+**Define an indicator working = 1 if their annual hours worked exceeds zero.**
+
+```{r echo = TRUE, results = 'hide', message=FALSE, warning=FALSE}
+library(tidyverse) # Load tidyverse
+```
 
 ```{r}
-library(tidyverse) # Load tidyverse
-
 # Create the new column "working" conditional on column "hours"
 data <- data %>% 
   mutate(working = case_when(hours > 0 ~ 1,
@@ -65,7 +67,7 @@ summary(data$working)
 
 
 ### c)	
-Create a measure of labor market experience, which is typically age minus years of education minus 6.
+**Create a measure of labor market experience, which is typically age minus years of education minus 6.**
 
 ```{r}
 # Create a new column called "experience"
@@ -75,19 +77,20 @@ data$experience <- data$age - data$educ - 6
 summary(data$experience)
 ```
 
-Warning: From summary statistics we know the way we construct the variable measuring labor market experience can be problematic, or we may have some invalid data entry, because there is an entry with -1 year of experience.
+Warning: From summary statistics we know the way we constructed the variable measuring labor market experience can be problematic, or we may have some invalid data entry, because there is an entry with -1 year of experience.
 
+<br>
 
 ## Section 1
 
 First, we wish to study the relationship between wages and experience. For this section, limit your analysis to household heads that are working. 
 
 ### a)	
-Plot wages against experience (put experience on the horizontal axis and wages on the vertical axis). Describe the correlation between wages and experience. Does the correlation appear to be strong or weak? Explain.
+**Plot wages against experience (put experience on the horizontal axis and wages on the vertical axis). Describe the correlation between wages and experience. Does the correlation appear to be strong or weak? Explain.**
 
 The following graph is a scatter plot describing the relationship between wages and experience in our dataset. The scatter plot seems to show that there is not a strong correlation between wages and experience. 
 
-To make things clearer, I added a trend line based on the LOESS (in orange) and a trend line based on the linear estimation (in blue). Both lines indicate a very weak correlation between experience and wages. 
+To make things clearer, I added a trend line based on the LOESS (in orange) and a trend line based on the linear estimation (in blue). Both lines indicate **a very weak correlation between experience and wages**. 
 
 ```{r}
 
@@ -101,9 +104,9 @@ ggplot(subset(data, working == 1), aes(experience, hourly_wage)) + # Subset
 
 
 ### b)	
-What is the sample correlation between wages and experience? Did you expect to find this result? Why or why not?
+**What is the sample correlation between wages and experience? Did you expect to find this result? Why or why not?**
 
-The sample correlation between the two is about 0.12 (rounded to the nearest hundredth). We should expect to see this result, because we just saw a very weak relationship between the two from the scatter plot above.
+The sample correlation between the two is about 0.12 (rounded to the nearest hundredth). We should expect to see this result, because we just saw a weak relationship between the two from the scatter plot above.
 
 ```{r}
 # Load the relevant package
@@ -114,13 +117,13 @@ subset(data, working == 1) %>%
 
 
 ### c)	
-Run the following regression #1: 
+**Run the following regression #1: **
 
-$ Wage = \beta_{0} + \beta_{1} * Experience + \mu_{i}$
+$Wage = \beta_{0} + \beta_{1} * Experience + \mu_{i}$
 
-What is the OLS estimate of β1? Is it significantly different from zero at the α = 0.05 level of significance?
+**What is the OLS estimate of β1? Is it significantly different from zero at the α = 0.05 level of significance?**
 
-The OLS estimate of $\beta_{1}$ is 0.21. It is significant at the $\alpha$ = .05 level. 
+The OLS estimate of $\beta_{1}$ is 0.21 (rounded to the nearest hundredth). It is significant at the $\alpha$ = .05 level. 
 
 ```{r}
 wage_exp_lm <- subset(data, working == 1) %>%
@@ -133,33 +136,34 @@ summary(wage_exp_lm)
 
 
 ### d)	
-What is the F-statistic for the null hypothesis H0: β1 = 0 in the regression? What critical value from the F-distribution table should you use when testing the null hypothesis at the α = 0.05 level of significance? Would you reject this null hypothesis according to the F test at the α = 0.05 level of significance?
+**What is the F-statistic for the null hypothesis H0: β1 = 0 in the regression? What critical value from the F-distribution table should you use when testing the null hypothesis at the α = 0.05 level of significance? Would you reject this null hypothesis according to the F test at the α = 0.05 level of significance?**
 
-From the regression table for question c), we can see that the F-statistic is 4.551. We also know that the numerator degree of freedom is 1, and the denominator degree of freedom is 2880 in our case, so we can calculate the cut-off F-statistics using the following syntax:
+From the regression table for question c), we can see that the F-statistic is 43. We also know that the numerator degree of freedom is 1, and the denominator degree of freedom is 2880 in our case, so we can calculate the cut-off F-statistics using the following syntax:
 
 ```{r}
 qf(.05, 1, 2880, lower.tail = FALSE)
 ```
-Since our F-statistics is 43, which is larger than 3.85, the critical value at $\alpha$ = .05. We should the reject the mull hypothesis. 
+Since our F-statistics is 43, which is larger than 3.85, the critical value at $\alpha$ = .05. We should reject the null hypothesis. 
 
 
 ### e)	
-Notice that you got the same answer in parts C and D. In both cases, you are testing the null hypothesis H0: β1 = 0, so you should get the same answer no matter which method you use. When testing the significance of a single parameter, it can be shown that the F-statistic is equal to the square of the t-statistic. Does this hold in your output?
+**Notice that you got the same answer in parts C and D. In both cases, you are testing the null hypothesis H0: β1 = 0, so you should get the same answer no matter which method you use. When testing the significance of a single parameter, it can be shown that the F-statistic is equal to the square of the t-statistic. Does this hold in your output?**
 
-We can see from below that the f statistics equals to the square of the t statistics in our case.
+We can see from below that the F-statistics equals to the square of the t-statistics in our case.
 
 ```{r}
 summary(wage_exp_lm)$fstatistic[1] # Extract f statistics 
 coef(summary(wage_exp_lm))[, "t value"][2]^2 # Extract t statistics and square
 ```
 
+<br>
 
 ## Section 2
 
 Now we wish to study the relationship between wages and experience controlling for education. Again, please limit your analysis to household heads that are working.
 
 ### a)
-What is the sample correlation between education and wages? What is the sample correlation between education and experience? Did you expect to find this latter correlation? Why or why not? 
+**What is the sample correlation between education and wages? What is the sample correlation between education and experience? Did you expect to find this latter correlation? Why or why not?**
 
 ```{r}
 subset(data, working == 1) %>%
@@ -173,17 +177,17 @@ We should expect a negative correlation between education and experience, becaus
 
 
 ### b)	
-Now run regression #2: 
+**Now run regression #2:** 
 
 Wage = $\beta_{0}$ + $\beta_{1}$experience + $\beta_{2}$ educ + $\mu_{i}$
 
-What is the OLS estimate of β1? Is it significantly different from zero at the α = 0.05 level of significance? Why do you think the estimate of β1 differs from the result you found in problem 1? Do you think the result you found here in problem 2 is a ‘better’ estimate of the effect of one more year of experience on earnings than the estimate in problem 1? Why? (This last question is not a statistical question.)
+**What is the OLS estimate of β1? Is it significantly different from zero at the α = 0.05 level of significance? Why do you think the estimate of β1 differs from the result you found in problem 1? Do you think the result you found here in problem 2 is a ‘better’ estimate of the effect of one more year of experience on earnings than the estimate in problem 1? Why? (This last question is not a statistical question.)**
 
-From the regression output below, we can see that the OLS estimate of $\beta_{1}$ is about 0.27. It's significant different from zero at the $\alpha$ = .05 level. 
+From the regression output below, we can see that the OLS estimate of $\beta_{1}$ is about 0.27 (rounded to the nearest hundredth). It's significantly different from zero at the $\alpha$ = .05 level. 
 
-The $\beta_{1}$ is different because here in our model, $\beta_{1}$ represents the linearly estimated relationship between experience and wages, controlling education. 
+The $\beta_{1}$ here is different from the $\beta_{1}$ in the previous model because here in our model, $\beta_{1}$ represents the linearly estimated relationship between experience and wages, **holding education constant**. 
 
-The results we have here should "better" represents the relationship in the real world, because education affects wages greatly according to theory and our intuition. After controlling education, we did see a stronger relationship between wage and experience, to which we're also expecting.    
+The results we have here should "better" represent the relationship in the real world, because education affects wages greatly according to theory and our intuition. After controlling education, we did see a stronger relationship between wages and experience, to which we're also expecting.    
 
 
 ```{r}
@@ -197,9 +201,9 @@ summary(w_e_edu_lm)
 
 
 ### c)	
-Test the null hypothesis H0: β2 = 0 at the α = 0.05 level of significance using two methods. First, use the t-statistic from regression #2. Second, use the F-test for the incremental effect of adding an independent variable. You will need to use the results from both regression #1 and regression #2. Show all of your work for constructing this F-test. Do you get the same answer from each of these methods? Are the two methods related? (Please state your decision rule for each of these methods.)
+**Test the null hypothesis H0: β2 = 0 at the α = 0.05 level of significance using two methods. First, use the t-statistic from regression #2. Second, use the F-test for the incremental effect of adding an independent variable. You will need to use the results from both regression #1 and regression #2. Show all of your work for constructing this F-test. Do you get the same answer from each of these methods? Are the two methods related? (Please state your decision rule for each of these methods.)**
 
-From the regression table presented above for question b), we can see that $\beta_{2}$ is significant at the $\alpha$ = 0.05 level. The t-statistics is 15.090, much larger than the cut-off t-statistics for $\alpha$ = 0.05, which we calculated below:
+From the regression table presented above for question b), we can see that $\beta_{2}$ is significant at the $\alpha$ = .05 level. The t-statistics is 15.090, much larger than the cut-off t-statistics for $\alpha$ = .05, which we calculated below:
 
 
 ```{r}
@@ -207,7 +211,7 @@ qt(.05, 2879, lower.tail=FALSE)
 ```
 
 
-To verify what we achieved above, we perform a partial F-test. In this case, our full model is: `w_e_edu_lm`, the regression object we constructed for this section. Meanwhile, our reduced model is `wage_exp_lm`, the regression object we constructed for section 1. 
+To verify what we achieved above, we perform a **partial F-test**. In this case, our full model is: `w_e_edu_lm`, the regression object we constructed for this section. Meanwhile, our reduced model is `wage_exp_lm`, the regression object we constructed for section 1. 
 
 We know that the formula for partial F-test is:
 
@@ -245,30 +249,30 @@ Alternatively, we can just let R do the tough work for us:
 ```{r}
 anova(wage_exp_lm, w_e_edu_lm)
 ```
-From the table above, we can see that F is also 227.71, and it is significant  at the .05 level. We reject the null hypothesis ($\beta_{2}=0$) and conclude that the column `education` contributes significant information to wages.  
+From the table above, we can see that F is also 227.71, and it is significant  at the $\alpha$=.05 level. We reject the null hypothesis ($\beta_{2}=0$) and conclude that `education` contributes significant information to wages.  
 
-The t-test and partial F-test here render the same conclusion. Actually, we can see that the square of the t-statistics for education equals to the F-statistics we have our partial F-test. 
+The t-test and partial F-test here render the same conclusion. Actually, we can see that **the square of the t-statistics for education equals to the F-statistics in our partial F-test**. 
 
 We have demonstrated our decision rules for both two tests in the above paragraphs explicitly. For both of them, we compare the statistics with the cut-off value at the $\alpha=.05$ level. If our statistics is larger than the cut-off value, we reject the null hypothesis ($\beta_{2}=0$). 
 
 
 ### d)	
-Test the joint null hypothesis H0: β1 = β2 = 0 at the α = 0.05 level. Be sure to state your decision rule.
+**Test the joint null hypothesis H0: β1 = β2 = 0 at the α = 0.05 level. Be sure to state your decision rule.**
 
-To test this hypothesis, we simply refer to the F-statistics for our full model:
+To test this hypothesis, we simply refer to the F-statistics in our full model:
 
 ```{r}
 summary(w_e_edu_lm)
 ```
 
-The F-statistics is 137, significant at the .05 level, indicating that we should clearly reject the hull hypothesis that the variables `experience` and `educ` collectively have no effect on `wages`. 
+The F-statistics is 137, significant at the .05 level, indicating that we should clearly reject the null hypothesis that the variables `experience` and `educ` collectively have no effect on `wages`. 
 
-The result also shows that the variable `experience` is significant (p < 2e-16) controlling for the variable `educ`, as is `educ` (p < 2e-16) controlling for the variable `experience`
+The results also show that the variable `experience` is significant (p < 2e-16) controlling for the variable `educ`, as is `educ` (p < 2e-16) controlling for the variable `experience`.
 
 ### e)	
-Test the null hypothesis H0: β1 + β2 = 2 at the α = 0.05 level.
+**Test the null hypothesis H0: β1 + β2 = 2 at the α = 0.05 level.**
 
-To test this, we simply pull out the 95% confidence interval for both $\beta_{1}$ and $\beta_{2}$, and them up to construct the 95% confidence interval for $\beta_{1} + \beta_{2}$:
+To test this, we simply pull out the 95% confidence interval for both $\beta_{1}$ and $\beta_{2}$, and add them up to construct the 95% confidence interval for $\beta_{1} + \beta_{2}$:
 
 ```{r}
 # Confidence interval for beta1 + beta2 Lower bound 

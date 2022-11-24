@@ -402,8 +402,8 @@ summary(data) # General info of the dataset</code></pre>
 <h2>Section 0</h2>
 <div id="a" class="section level3">
 <h3>a)</h3>
-<p>Create an hourly wage variable, which is earnings divided by hours
-worked.</p>
+<p><strong>Create an hourly wage variable, which is earnings divided by
+hours worked.</strong></p>
 <pre class="r"><code># Create the new column named &quot;hourly_wage&quot;
 data$hourly_wage &lt;- data$earnings / data$hours
 
@@ -414,18 +414,9 @@ summary(data$hourly_wage)</code></pre>
 </div>
 <div id="b" class="section level3">
 <h3>b)</h3>
-<p>Define an indicator working = 1 if their annual hours worked exceeds
-zero.</p>
+<p><strong>Define an indicator working = 1 if their annual hours worked
+exceeds zero.</strong></p>
 <pre class="r"><code>library(tidyverse) # Load tidyverse</code></pre>
-<pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-## ✔ ggplot2 3.3.6      ✔ purrr   0.3.4 
-## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-## ✔ tidyr   1.2.1      ✔ stringr 1.4.1 
-## ✔ readr   2.1.3      ✔ forcats 0.5.2</code></pre>
-<pre><code>## Warning: package &#39;readr&#39; was built under R version 4.2.2</code></pre>
-<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code># Create the new column &quot;working&quot; conditional on column &quot;hours&quot;
 data &lt;- data %&gt;% 
   mutate(working = case_when(hours &gt; 0 ~ 1,
@@ -439,8 +430,8 @@ summary(data$working)</code></pre>
 </div>
 <div id="c" class="section level3">
 <h3>c)</h3>
-<p>Create a measure of labor market experience, which is typically age
-minus years of education minus 6.</p>
+<p><strong>Create a measure of labor market experience, which is
+typically age minus years of education minus 6.</strong></p>
 <pre class="r"><code># Create a new column called &quot;experience&quot;
 data$experience &lt;- data$age - data$educ - 6
 
@@ -448,10 +439,11 @@ data$experience &lt;- data$age - data$educ - 6
 summary(data$experience)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
 ##   -1.00   14.00   23.00   25.46   33.00   83.00    3359</code></pre>
-<p>Warning: From summary statistics we know the way we construct the
+<p>Warning: From summary statistics we know the way we constructed the
 variable measuring labor market experience can be problematic, or we may
 have some invalid data entry, because there is an entry with -1 year of
 experience.</p>
+<p><br></p>
 </div>
 </div>
 <div id="section-1" class="section level2">
@@ -461,17 +453,18 @@ experience. For this section, limit your analysis to household heads
 that are working.</p>
 <div id="a-1" class="section level3">
 <h3>a)</h3>
-<p>Plot wages against experience (put experience on the horizontal axis
-and wages on the vertical axis). Describe the correlation between wages
-and experience. Does the correlation appear to be strong or weak?
-Explain.</p>
+<p><strong>Plot wages against experience (put experience on the
+horizontal axis and wages on the vertical axis). Describe the
+correlation between wages and experience. Does the correlation appear to
+be strong or weak? Explain.</strong></p>
 <p>The following graph is a scatter plot describing the relationship
 between wages and experience in our dataset. The scatter plot seems to
 show that there is not a strong correlation between wages and
 experience.</p>
 <p>To make things clearer, I added a trend line based on the LOESS (in
 orange) and a trend line based on the linear estimation (in blue). Both
-lines indicate a very weak correlation between experience and wages.</p>
+lines indicate <strong>a very weak correlation between experience and
+wages</strong>.</p>
 <pre class="r"><code>ggplot(subset(data, working == 1), aes(experience, hourly_wage)) + # Subset
   geom_point(color = &#39;#00AFBB&#39;, size = 1) + # Scatter plot 
   geom_smooth(color = &quot;steelblue&quot;, method = &#39;lm&#39;) +# Add the linear Smooth Line
@@ -483,12 +476,11 @@ lines indicate a very weak correlation between experience and wages.</p>
 </div>
 <div id="b-1" class="section level3">
 <h3>b)</h3>
-<p>What is the sample correlation between wages and experience? Did you
-expect to find this result? Why or why not?</p>
+<p><strong>What is the sample correlation between wages and experience?
+Did you expect to find this result? Why or why not?</strong></p>
 <p>The sample correlation between the two is about 0.12 (rounded to the
 nearest hundredth). We should expect to see this result, because we just
-saw a very weak relationship between the two from the scatter plot
-above.</p>
+saw a weak relationship between the two from the scatter plot above.</p>
 <pre class="r"><code># Load the relevant package
 subset(data, working == 1) %&gt;%
   select(experience, hourly_wage) %&gt;% 
@@ -499,12 +491,13 @@ subset(data, working == 1) %&gt;%
 </div>
 <div id="c-1" class="section level3">
 <h3>c)</h3>
-<p>Run the following regression #1:</p>
-<p>$ Wage = <em>{0} + </em>{1} * Experience + _{i}$</p>
-<p>What is the OLS estimate of β1? Is it significantly different from
-zero at the α = 0.05 level of significance?</p>
+<p><strong>Run the following regression #1: </strong></p>
+<p><span class="math inline">\(Wage = \beta_{0} + \beta_{1} * Experience
++ \mu_{i}\)</span></p>
+<p><strong>What is the OLS estimate of β1? Is it significantly different
+from zero at the α = 0.05 level of significance?</strong></p>
 <p>The OLS estimate of <span class="math inline">\(\beta_{1}\)</span> is
-0.21. It is significant at the <span class="math inline">\(\alpha\)</span> = .05 level.</p>
+0.21 (rounded to the nearest hundredth). It is significant at the <span class="math inline">\(\alpha\)</span> = .05 level.</p>
 <pre class="r"><code>wage_exp_lm &lt;- subset(data, working == 1) %&gt;%
   select(experience, hourly_wage) %&gt;%
   lm(hourly_wage ~ experience, data=.)
@@ -531,37 +524,38 @@ summary(wage_exp_lm)</code></pre>
 </div>
 <div id="d" class="section level3">
 <h3>d)</h3>
-<p>What is the F-statistic for the null hypothesis H0: β1 = 0 in the
-regression? What critical value from the F-distribution table should you
-use when testing the null hypothesis at the α = 0.05 level of
+<p><strong>What is the F-statistic for the null hypothesis H0: β1 = 0 in
+the regression? What critical value from the F-distribution table should
+you use when testing the null hypothesis at the α = 0.05 level of
 significance? Would you reject this null hypothesis according to the F
-test at the α = 0.05 level of significance?</p>
+test at the α = 0.05 level of significance?</strong></p>
 <p>From the regression table for question c), we can see that the
-F-statistic is 4.551. We also know that the numerator degree of freedom
-is 1, and the denominator degree of freedom is 2880 in our case, so we
-can calculate the cut-off F-statistics using the following syntax:</p>
+F-statistic is 43. We also know that the numerator degree of freedom is
+1, and the denominator degree of freedom is 2880 in our case, so we can
+calculate the cut-off F-statistics using the following syntax:</p>
 <pre class="r"><code>qf(.05, 1, 2880, lower.tail = FALSE)</code></pre>
 <pre><code>## [1] 3.84469</code></pre>
 <p>Since our F-statistics is 43, which is larger than 3.85, the critical
 value at <span class="math inline">\(\alpha\)</span> = .05. We should
-the reject the mull hypothesis.</p>
+reject the null hypothesis.</p>
 </div>
 <div id="e" class="section level3">
 <h3>e)</h3>
-<p>Notice that you got the same answer in parts C and D. In both cases,
-you are testing the null hypothesis H0: β1 = 0, so you should get the
-same answer no matter which method you use. When testing the
+<p><strong>Notice that you got the same answer in parts C and D. In both
+cases, you are testing the null hypothesis H0: β1 = 0, so you should get
+the same answer no matter which method you use. When testing the
 significance of a single parameter, it can be shown that the F-statistic
 is equal to the square of the t-statistic. Does this hold in your
-output?</p>
-<p>We can see from below that the f statistics equals to the square of
-the t statistics in our case.</p>
+output?</strong></p>
+<p>We can see from below that the F-statistics equals to the square of
+the t-statistics in our case.</p>
 <pre class="r"><code>summary(wage_exp_lm)$fstatistic[1] # Extract f statistics </code></pre>
 <pre><code>##    value 
 ## 42.99983</code></pre>
 <pre class="r"><code>coef(summary(wage_exp_lm))[, &quot;t value&quot;][2]^2 # Extract t statistics and square</code></pre>
 <pre><code>## experience 
 ##   42.99983</code></pre>
+<p><br></p>
 </div>
 </div>
 <div id="section-2" class="section level2">
@@ -571,9 +565,9 @@ controlling for education. Again, please limit your analysis to
 household heads that are working.</p>
 <div id="a-2" class="section level3">
 <h3>a)</h3>
-<p>What is the sample correlation between education and wages? What is
-the sample correlation between education and experience? Did you expect
-to find this latter correlation? Why or why not?</p>
+<p><strong>What is the sample correlation between education and wages?
+What is the sample correlation between education and experience? Did you
+expect to find this latter correlation? Why or why not?</strong></p>
 <pre class="r"><code>subset(data, working == 1) %&gt;%
   select(experience, hourly_wage, educ) %&gt;% 
   cor(.)</code></pre>
@@ -590,26 +584,28 @@ likely you enter the labor market early.</p>
 </div>
 <div id="b-2" class="section level3">
 <h3>b)</h3>
-<p>Now run regression #2:</p>
+<p><strong>Now run regression #2:</strong></p>
 <p>Wage = <span class="math inline">\(\beta_{0}\)</span> + <span class="math inline">\(\beta_{1}\)</span>experience + <span class="math inline">\(\beta_{2}\)</span> educ + <span class="math inline">\(\mu_{i}\)</span></p>
-<p>What is the OLS estimate of β1? Is it significantly different from
-zero at the α = 0.05 level of significance? Why do you think the
+<p><strong>What is the OLS estimate of β1? Is it significantly different
+from zero at the α = 0.05 level of significance? Why do you think the
 estimate of β1 differs from the result you found in problem 1? Do you
 think the result you found here in problem 2 is a ‘better’ estimate of
 the effect of one more year of experience on earnings than the estimate
 in problem 1? Why? (This last question is not a statistical
-question.)</p>
+question.)</strong></p>
 <p>From the regression output below, we can see that the OLS estimate of
-<span class="math inline">\(\beta_{1}\)</span> is about 0.27. It’s
-significant different from zero at the <span class="math inline">\(\alpha\)</span> = .05 level.</p>
-<p>The <span class="math inline">\(\beta_{1}\)</span> is different
-because here in our model, <span class="math inline">\(\beta_{1}\)</span> represents the linearly
-estimated relationship between experience and wages, controlling
-education.</p>
-<p>The results we have here should “better” represents the relationship
+<span class="math inline">\(\beta_{1}\)</span> is about 0.27 (rounded to
+the nearest hundredth). It’s significantly different from zero at the
+<span class="math inline">\(\alpha\)</span> = .05 level.</p>
+<p>The <span class="math inline">\(\beta_{1}\)</span> here is different
+from the <span class="math inline">\(\beta_{1}\)</span> in the previous
+model because here in our model, <span class="math inline">\(\beta_{1}\)</span> represents the linearly
+estimated relationship between experience and wages, <strong>holding
+education constant</strong>.</p>
+<p>The results we have here should “better” represent the relationship
 in the real world, because education affects wages greatly according to
 theory and our intuition. After controlling education, we did see a
-stronger relationship between wage and experience, to which we’re also
+stronger relationship between wages and experience, to which we’re also
 expecting.</p>
 <pre class="r"><code>w_e_edu_lm &lt;- subset(data, working == 1) %&gt;%
   select(experience, hourly_wage, educ) %&gt;%
@@ -638,27 +634,27 @@ summary(w_e_edu_lm)</code></pre>
 </div>
 <div id="c-2" class="section level3">
 <h3>c)</h3>
-<p>Test the null hypothesis H0: β2 = 0 at the α = 0.05 level of
+<p><strong>Test the null hypothesis H0: β2 = 0 at the α = 0.05 level of
 significance using two methods. First, use the t-statistic from
 regression #2. Second, use the F-test for the incremental effect of
 adding an independent variable. You will need to use the results from
 both regression #1 and regression #2. Show all of your work for
 constructing this F-test. Do you get the same answer from each of these
 methods? Are the two methods related? (Please state your decision rule
-for each of these methods.)</p>
+for each of these methods.)</strong></p>
 <p>From the regression table presented above for question b), we can see
 that <span class="math inline">\(\beta_{2}\)</span> is significant at
-the <span class="math inline">\(\alpha\)</span> = 0.05 level. The
+the <span class="math inline">\(\alpha\)</span> = .05 level. The
 t-statistics is 15.090, much larger than the cut-off t-statistics for
-<span class="math inline">\(\alpha\)</span> = 0.05, which we calculated
+<span class="math inline">\(\alpha\)</span> = .05, which we calculated
 below:</p>
 <pre class="r"><code>qt(.05, 2879, lower.tail=FALSE)</code></pre>
 <pre><code>## [1] 1.645383</code></pre>
-<p>To verify what we achieved above, we perform a partial F-test. In
-this case, our full model is: <code>w_e_edu_lm</code>, the regression
-object we constructed for this section. Meanwhile, our reduced model is
-<code>wage_exp_lm</code>, the regression object we constructed for
-section 1.</p>
+<p>To verify what we achieved above, we perform a <strong>partial
+F-test</strong>. In this case, our full model is:
+<code>w_e_edu_lm</code>, the regression object we constructed for this
+section. Meanwhile, our reduced model is <code>wage_exp_lm</code>, the
+regression object we constructed for section 1.</p>
 <p>We know that the formula for partial F-test is:</p>
 <p><span class="math inline">\(F = \frac{\frac{RSS_{reduced} -
 RSS_{full}}{p}}{\frac{RSS_{full}}{n-k}}\)</span></p>
@@ -694,11 +690,12 @@ hundredth)</p>
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>From the table above, we can see that F is also 227.71, and it is
-significant at the .05 level. We reject the null hypothesis (<span class="math inline">\(\beta_{2}=0\)</span>) and conclude that the column
+significant at the <span class="math inline">\(\alpha\)</span>=.05
+level. We reject the null hypothesis (<span class="math inline">\(\beta_{2}=0\)</span>) and conclude that
 <code>education</code> contributes significant information to wages.</p>
 <p>The t-test and partial F-test here render the same conclusion.
-Actually, we can see that the square of the t-statistics for education
-equals to the F-statistics we have our partial F-test.</p>
+Actually, we can see that <strong>the square of the t-statistics for
+education equals to the F-statistics in our partial F-test</strong>.</p>
 <p>We have demonstrated our decision rules for both two tests in the
 above paragraphs explicitly. For both of them, we compare the statistics
 with the cut-off value at the <span class="math inline">\(\alpha=.05\)</span> level. If our statistics is
@@ -706,9 +703,9 @@ larger than the cut-off value, we reject the null hypothesis (<span class="math 
 </div>
 <div id="d-1" class="section level3">
 <h3>d)</h3>
-<p>Test the joint null hypothesis H0: β1 = β2 = 0 at the α = 0.05 level.
-Be sure to state your decision rule.</p>
-<p>To test this hypothesis, we simply refer to the F-statistics for our
+<p><strong>Test the joint null hypothesis H0: β1 = β2 = 0 at the α =
+0.05 level. Be sure to state your decision rule.</strong></p>
+<p>To test this hypothesis, we simply refer to the F-statistics in our
 full model:</p>
 <pre class="r"><code>summary(w_e_edu_lm)</code></pre>
 <pre><code>## 
@@ -731,20 +728,21 @@ full model:</p>
 ## Multiple R-squared:  0.08693,    Adjusted R-squared:  0.08629 
 ## F-statistic:   137 on 2 and 2879 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>The F-statistics is 137, significant at the .05 level, indicating
-that we should clearly reject the hull hypothesis that the variables
+that we should clearly reject the null hypothesis that the variables
 <code>experience</code> and <code>educ</code> collectively have no
 effect on <code>wages</code>.</p>
-<p>The result also shows that the variable <code>experience</code> is
+<p>The results also show that the variable <code>experience</code> is
 significant (p &lt; 2e-16) controlling for the variable
 <code>educ</code>, as is <code>educ</code> (p &lt; 2e-16) controlling
-for the variable <code>experience</code></p>
+for the variable <code>experience</code>.</p>
 </div>
 <div id="e-1" class="section level3">
 <h3>e)</h3>
-<p>Test the null hypothesis H0: β1 + β2 = 2 at the α = 0.05 level.</p>
+<p><strong>Test the null hypothesis H0: β1 + β2 = 2 at the α = 0.05
+level.</strong></p>
 <p>To test this, we simply pull out the 95% confidence interval for both
-<span class="math inline">\(\beta_{1}\)</span> and <span class="math inline">\(\beta_{2}\)</span>, and them up to construct the
-95% confidence interval for <span class="math inline">\(\beta_{1} +
+<span class="math inline">\(\beta_{1}\)</span> and <span class="math inline">\(\beta_{2}\)</span>, and add them up to construct
+the 95% confidence interval for <span class="math inline">\(\beta_{1} +
 \beta_{2}\)</span>:</p>
 <pre class="r"><code># Confidence interval for beta1 + beta2 Lower bound 
 confint(w_e_edu_lm)[2,1] + confint(w_e_edu_lm)[3,1]</code></pre>
