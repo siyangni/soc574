@@ -91,7 +91,7 @@ To make things clearer, I added a trend line based on the LOESS (in orange) and 
 
 ```{r}
 
-ggplot(subset(data, working == 1), aes(experience, earnings)) + # Subset
+ggplot(subset(data, working == 1), aes(experience, hourly_wage)) + # Subset
   geom_point(color = '#00AFBB', size = 1) + # Scatter plot 
   geom_smooth(color = "steelblue", method = 'lm') +# Add the linear Smooth Line
   geom_smooth(color = '#D55E00', method = 'loess') + # add the loess smooth line
@@ -103,12 +103,12 @@ ggplot(subset(data, working == 1), aes(experience, earnings)) + # Subset
 ### b)	
 What is the sample correlation between wages and experience? Did you expect to find this result? Why or why not?
 
-The sample correlation between the two is about 0.04 (rounded to the nearest hundredth). We should expect to see this result, because we just saw a very weak relationship between the two from the scatterplot above.
+The sample correlation between the two is about 0.12 (rounded to the nearest hundredth). We should expect to see this result, because we just saw a very weak relationship between the two from the scatter plot above.
 
 ```{r}
 # Load the relevant package
 subset(data, working == 1) %>%
-  select(experience, earnings) %>% 
+  select(experience, hourly_wage) %>% 
   cor(.)
 ```
 
@@ -120,12 +120,12 @@ $ Wage = \beta_{0} + \beta_{1} * Experience + \mu_{i}$
 
 What is the OLS estimate of β1? Is it significantly different from zero at the α = 0.05 level of significance?
 
-The OLS estimate of $\beta_{1}$ is 143.48. It is significant at the $\alpha$ = .05 level. 
+The OLS estimate of $\beta_{1}$ is 0.21. It is significant at the $\alpha$ = .05 level. 
 
 ```{r}
 wage_exp_lm <- subset(data, working == 1) %>%
-  select(experience, earnings) %>%
-  lm(earnings ~ experience, data=.)
+  select(experience, hourly_wage) %>%
+  lm(hourly_wage ~ experience, data=.)
 
 summary(wage_exp_lm)
 ```
@@ -140,7 +140,7 @@ From the regression table for question c), we can see that the F-statistic is 4.
 ```{r}
 qf(.05, 1, 2880, lower.tail = FALSE)
 ```
-Since our F-statistics is 4.551, which is larger than 3.85, the critical value at $\alpha$ = .05. We should the reject the mull hypothesis. 
+Since our F-statistics is 43, which is larger than 3.85, the critical value at $\alpha$ = .05. We should the reject the mull hypothesis. 
 
 
 ### e)	
@@ -161,24 +161,122 @@ Now we wish to study the relationship between wages and experience controlling f
 ### a)
 What is the sample correlation between education and wages? What is the sample correlation between education and experience? Did you expect to find this latter correlation? Why or why not? 
 
+```{r}
+subset(data, working == 1) %>%
+  select(experience, hourly_wage, educ) %>% 
+  cor(.)
+```
+
+From the correlation matrix above, we can see that the sample correlation between education and wages is about 0.25. The sample correlation between education and experience is about -0.13. 
+
+We should expect a negative correlation between education and experience, because the more years you invest into schooling, the less likely you enter the labor market early.
+
+
 ### b)	
 Now run regression #2: 
 
-Wage = 0 + 1 experience + 2 educ + ui
+Wage = $\beta_{0}$ + $\beta_{1}$experience + $\beta_{2}$ educ + $\mu_{i}$
 
 What is the OLS estimate of β1? Is it significantly different from zero at the α = 0.05 level of significance? Why do you think the estimate of β1 differs from the result you found in problem 1? Do you think the result you found here in problem 2 is a ‘better’ estimate of the effect of one more year of experience on earnings than the estimate in problem 1? Why? (This last question is not a statistical question.)
+
+From the regression output below, we can see that the OLS estimate of $\beta_{1}$ is about 0.27. It's significant different from zero at the $\alpha$ = .05 level. 
+
+The $\beta_{1}$ is different because here in our model, $\beta_{1}$ represents the linearly estimated relationship between experience and wages, controlling education. 
+
+The results we have here should "better" represents the relationship in the real world, because education affects wages greatly according to theory and our intuition. After controlling education, we did see a stronger relationship between wage and experience, to which we're also expecting.    
+
+
+```{r}
+w_e_edu_lm <- subset(data, working == 1) %>%
+  select(experience, hourly_wage, educ) %>%
+  lm(hourly_wage ~ experience + educ, data=.)
+
+summary(w_e_edu_lm)
+
+```
+
 
 ### c)	
 Test the null hypothesis H0: β2 = 0 at the α = 0.05 level of significance using two methods. First, use the t-statistic from regression #2. Second, use the F-test for the incremental effect of adding an independent variable. You will need to use the results from both regression #1 and regression #2. Show all of your work for constructing this F-test. Do you get the same answer from each of these methods? Are the two methods related? (Please state your decision rule for each of these methods.)
 
+From the regression table presented above for question b), we can see that $\beta_{2}$ is significant at the $\alpha$ = 0.05 level. The t-statistics is 15.090, much larger than the cut-off t-statistics for $\alpha$ = 0.05, which we calculated below:
+
+
+```{r}
+qt(.05, 2879, lower.tail=FALSE)
+```
+
+
+To verify what we achieved above, we perform a partial F-test. In this case, our full model is: `w_e_edu_lm`, the regression object we constructed for this section. Meanwhile, our reduced model is `wage_exp_lm`, the regression object we constructed for section 1. 
+
+We know that the formula for partial F-test is:
+
+$F = \frac{\frac{RSS_{reduced} - RSS_{full}}{p}}{\frac{RSS_{full}}{n-k}}$
+
+From the two regressions we performed, we know that:
+
+$RSS_{reduced}$ is:
+```{r}
+sum(resid(wage_exp_lm)^2)
+```
+
+$RSS_{full}$ is: 
+```{r}
+sum(resid(w_e_edu_lm)^2)
+```
+**p** is the number of predictors removed from the full model, which is just 1 in our case.
+
+**n** is total observations in the sample used to perform the regression, in our case is:
+
+```{r}
+nrow(subset(data, working == 1))
+```
+
+**k** is the number of coefficients in the full model, in our case, it is 3. 
+
+So the F-statistics is:
+
+$F = \frac{\frac{1152928 - 1068424}{1}}{\frac{1068424}{2882-3}}$
+
+This is : **F** = 227.71 (rounded to the nearest hundredth)
+
+Alternatively, we can just let R do the tough work for us:
+
+```{r}
+anova(wage_exp_lm, w_e_edu_lm)
+```
+From the table above, we can see that F is also 227.71, and it is significant  at the .05 level. We reject the null hypothesis ($\beta_{2}=0$) and conclude that the column `education` contributes significant information to wages.  
+
+The t-test and partial F-test here render the same conclusion. Actually, we can see that the square of the t-statistics for education equals to the F-statistics we have our partial F-test. 
+
+We have demonstrated our decision rules for both two tests in the above paragraphs explicitly. For both of them, we compare the statistics with the cut-off value at the $\alpha=.05$ level. If our statistics is larger than the cut-off value, we reject the null hypothesis ($\beta_{2}=0$). 
+
+
 ### d)	
 Test the joint null hypothesis H0: β1 = β2 = 0 at the α = 0.05 level. Be sure to state your decision rule.
 
+To test this hypothesis, we simply refer to the F-statistics for our full model:
+
+```{r}
+summary(w_e_edu_lm)
+```
+
+The F-statistics is 137, significant at the .05 level, indicating that we should clearly reject the hull hypothesis that the variables `experience` and `educ` collectively have no effect on `wages`. 
+
+The result also shows that the variable `experience` is significant (p < 2e-16) controlling for the variable `educ`, as is `educ` (p < 2e-16) controlling for the variable `experience`
+
 ### e)	
-Test the null hypothesis H0: β1 + β2 = 2 at the α = 0.05 level at the α = 0.05 level. 
+Test the null hypothesis H0: β1 + β2 = 2 at the α = 0.05 level.
 
+To test this, we simply pull out the 95% confidence interval for both $\beta_{1}$ and $\beta_{2}$, and them up to construct the 95% confidence interval for $\beta_{1} + \beta_{2}$:
 
-
+```{r}
+# Confidence interval for beta1 + beta2 Lower bound 
+confint(w_e_edu_lm)[2,1] + confint(w_e_edu_lm)[3,1]
+# Confidence interval for beta1 + beta2 Upper bound 
+confint(w_e_edu_lm)[2,2] + confint(w_e_edu_lm)[3,2]
+```
+So the 95% confidence interval for $\beta_{1} + \beta_{2}$ is: (2.229604, 2.955296). Since the lower bound of our 95% CI for $\beta_{1} + \beta_{2}$ exceeds 2, we reject the null hypothesis: $\beta_{1} + \beta_{2} = 2$. 
 
 
 
