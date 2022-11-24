@@ -87,13 +87,14 @@ Plot wages against experience (put experience on the horizontal axis and wages o
 
 The following graph is a scatter plot describing the relationship between wages and experience in our dataset. The scatter plot seems to show that there is not a strong correlation between wages and experience. 
 
-To make things clearer, I added a trend line based on the LOESS (Locally Estimated Scatter plot Smoothing). The LOESS trend lines also indicates a very weak correlation between experience and wages. 
+To make things clearer, I added a trend line based on the LOESS (in orange) and a trend line based on the linear estimation (in blue). Both lines indicate a very weak correlation between experience and wages. 
 
 ```{r}
 
 ggplot(subset(data, working == 1), aes(experience, earnings)) + # Subset
   geom_point(color = '#00AFBB', size = 1) + # Scatter plot 
-  geom_smooth(color = "steelblue") # Add the LOESS Smooth Line
+  geom_smooth(color = "steelblue", method = 'lm') +# Add the linear Smooth Line
+  geom_smooth(color = '#D55E00', method = 'loess')
 
 ```
 
