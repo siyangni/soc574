@@ -94,7 +94,8 @@ To make things clearer, I added a trend line based on the LOESS (in orange) and 
 ggplot(subset(data, working == 1), aes(experience, earnings)) + # Subset
   geom_point(color = '#00AFBB', size = 1) + # Scatter plot 
   geom_smooth(color = "steelblue", method = 'lm') +# Add the linear Smooth Line
-  geom_smooth(color = '#D55E00', method = 'loess')
+  geom_smooth(color = '#D55E00', method = 'loess') + # add the loess smooth line
+  scale_y_continuous(labels = scales::comma) 
 
 ```
 
