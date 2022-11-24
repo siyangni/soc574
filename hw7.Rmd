@@ -1,0 +1,195 @@
+---
+title: 'SOC 574 Problem Set #7'
+author: "Siyang Ni"
+date: "2022-11-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The dataset you will be analyzing for this assignment is an extract from the Panel Study of Income Dynamics (1997). The file psid97.dat is included. Please include all relevant Stata output with you copy of the solutions. 
+
+The dataset includes five variables:
+•	Age of the household head (age)
+•	Years of education of the household head (educ) 
+•	Annual earnings for the household head in 1996 (earnings)
+•	Annual hours work for the household head in 1996 (hours) 
+•	An indicator for the marital status of the household head (1=married, 0=single)
+
+## Setting up the workspace
+
+Before doing any analysis, we first set up the proper working environment. 
+
+```{r}
+# Loading the dataset
+library(haven)  # Package for reading the Stata file
+data <- read_dta('psid97.dta') # Read into the dataset
+
+summary(data) # General info of the dataset
+```
+
+
+## Section 0
+
+### a)	
+Create an hourly wage variable, which is earnings divided by hours worked.
+
+```{r}
+# Create the new column named "hourly_wage"
+data$hourly_wage <- data$earnings / data$hours
+
+# Check it out
+summary(data$hourly_wage)
+
+```
+
+
+
+### b)	
+Define an indicator working = 1 if their annual hours worked exceeds zero.
+
+```{r}
+library(tidyverse) # Load tidyverse
+
+# Create the new column "working" conditional on column "hours"
+data <- data %>% 
+  mutate(working = case_when(hours > 0 ~ 1,
+                             hours == 0 ~ 0
+  ))
+
+# Check it out 
+summary(data$working)
+```
+
+
+### c)	
+Create a measure of labor market experience, which is typically age minus years of education minus 6.
+
+```{r}
+# Create a new column called "experience"
+data$experience <- data$age - data$educ - 6
+
+# Check it out
+summary(data$experience)
+```
+
+Warning: From summary statistics we know the way we construct the variable measuring labor market experience can be problematic, or we may have some invalid data entry, because there is an entry with -1 year of experience.
+
+
+## Section 1
+
+First, we wish to study the relationship between wages and experience. For this section, limit your analysis to household heads that are working. 
+
+### a)	
+Plot wages against experience (put experience on the horizontal axis and wages on the vertical axis). Describe the correlation between wages and experience. Does the correlation appear to be strong or weak? Explain.
+
+The following graph is a scatter plot describing the relationship between wages and experience in our dataset. The scatter plot seems to show that there is not a strong correlation between wages and experience. 
+
+To make things clearer, I added a trend line based on the LOESS (Locally Estimated Scatter plot Smoothing). The LOESS trend lines also indicates a very weak correlation between experience and wages. 
+
+```{r}
+
+ggplot(subset(data, working == 1), aes(experience, earnings)) + # Subset
+  geom_point(color = '#00AFBB', size = 1) + # Scatter plot 
+  geom_smooth(color = "steelblue") # Add the LOESS Smooth Line
+
+```
+
+
+### b)	
+What is the sample correlation between wages and experience? Did you expect to find this result? Why or why not?
+
+The sample correlation between the two is about 0.04 (rounded to the nearest hundredth). We should expect to see this result, because we just saw a very weak relationship between the two from the scatterplot above.
+
+```{r}
+# Load the relevant package
+subset(data, working == 1) %>%
+  select(experience, earnings) %>% 
+  cor(.)
+```
+
+
+### c)	
+Run the following regression #1: 
+
+$ Wage = \beta_{0} + \beta_{1} * Experience + \mu_{i}$
+
+What is the OLS estimate of β1? Is it significantly different from zero at the α = 0.05 level of significance?
+
+The OLS estimate of $\beta_{1}$ is 143.48. It is significant at the $\alpha$ = .05 level. 
+
+```{r}
+wage_exp_lm <- subset(data, working == 1) %>%
+  select(experience, earnings) %>%
+  lm(earnings ~ experience, data=.)
+
+summary(wage_exp_lm)
+```
+
+
+
+### d)	
+What is the F-statistic for the null hypothesis H0: β1 = 0 in the regression? What critical value from the F-distribution table should you use when testing the null hypothesis at the α = 0.05 level of significance? Would you reject this null hypothesis according to the F test at the α = 0.05 level of significance?
+
+From the regression table for question c), we can see that the F-statistic is 4.551. We also know that the numerator degree of freedom is 1, and the denominator degree of freedom is 2880 in our case, so we can calculate the cut-off F-statistics using the following syntax:
+
+```{r}
+qf(.05, 1, 2880, lower.tail = FALSE)
+```
+Since our F-statistics is 4.551, which is larger than 3.85, the critical value at $\alpha$ = .05. We should the reject the mull hypothesis. 
+
+
+### e)	
+Notice that you got the same answer in parts C and D. In both cases, you are testing the null hypothesis H0: β1 = 0, so you should get the same answer no matter which method you use. When testing the significance of a single parameter, it can be shown that the F-statistic is equal to the square of the t-statistic. Does this hold in your output?
+
+We can see from below that the f statistics equals to the square of the t statistics in our case.
+
+```{r}
+summary(wage_exp_lm)$fstatistic[1] # Extract f statistics 
+coef(summary(wage_exp_lm))[, "t value"][2]^2 # Extract t statistics and square
+```
+
+
+## Section 2
+
+Now we wish to study the relationship between wages and experience controlling for education. Again, please limit your analysis to household heads that are working.
+
+### a)
+What is the sample correlation between education and wages? What is the sample correlation between education and experience? Did you expect to find this latter correlation? Why or why not? 
+
+### b)	
+Now run regression #2: 
+
+Wage = 0 + 1 experience + 2 educ + ui
+
+What is the OLS estimate of β1? Is it significantly different from zero at the α = 0.05 level of significance? Why do you think the estimate of β1 differs from the result you found in problem 1? Do you think the result you found here in problem 2 is a ‘better’ estimate of the effect of one more year of experience on earnings than the estimate in problem 1? Why? (This last question is not a statistical question.)
+
+### c)	
+Test the null hypothesis H0: β2 = 0 at the α = 0.05 level of significance using two methods. First, use the t-statistic from regression #2. Second, use the F-test for the incremental effect of adding an independent variable. You will need to use the results from both regression #1 and regression #2. Show all of your work for constructing this F-test. Do you get the same answer from each of these methods? Are the two methods related? (Please state your decision rule for each of these methods.)
+
+### d)	
+Test the joint null hypothesis H0: β1 = β2 = 0 at the α = 0.05 level. Be sure to state your decision rule.
+
+### e)	
+Test the null hypothesis H0: β1 + β2 = 2 at the α = 0.05 level at the α = 0.05 level. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
